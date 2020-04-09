@@ -45,6 +45,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * @RouteResource("Timesheet")
+ * @SWG\Tag(name="Timesheet")
  *
  * @Security("is_granted('IS_AUTHENTICATED_REMEMBERED')")
  */
@@ -169,8 +170,9 @@ class TimesheetController extends BaseApiController
             if (!empty($customers)) {
                 $query->setCustomers($customers);
             }
-        } elseif (!empty($customer = $paramFetcher->get('customer'))) {
-            @trigger_error('Timesheet API parameter "customer" is deprecated and will be removed with 2.0, use "customers" instead', E_USER_DEPRECATED);
+        }
+
+        if (!empty($customer = $paramFetcher->get('customer'))) {
             $query->addCustomer($customer);
         }
 
@@ -181,8 +183,9 @@ class TimesheetController extends BaseApiController
             if (!empty($projects)) {
                 $query->setProjects($projects);
             }
-        } elseif (!empty($project = $paramFetcher->get('project'))) {
-            @trigger_error('Timesheet API parameter "project" is deprecated and will be removed with 2.0, use "projects" instead', E_USER_DEPRECATED);
+        }
+
+        if (!empty($project = $paramFetcher->get('project'))) {
             $query->addProject($project);
         }
 
@@ -193,8 +196,9 @@ class TimesheetController extends BaseApiController
             if (!empty($activities)) {
                 $query->setActivities($activities);
             }
-        } elseif (!empty($activity = $paramFetcher->get('activity'))) {
-            @trigger_error('Timesheet API parameter "activity" is deprecated and will be removed with 2.0, use "activities" instead', E_USER_DEPRECATED);
+        }
+
+        if (!empty($activity = $paramFetcher->get('activity'))) {
             $query->addActivity($activity);
         }
 
@@ -434,7 +438,7 @@ class TimesheetController extends BaseApiController
             return $this->viewHandler->handle($view);
         }
 
-        $this->repository->save($timesheet);
+        $this->service->updateTimesheet($timesheet);
 
         $view = new View($timesheet, Response::HTTP_OK);
         $view->getContext()->setGroups(['Default', 'Entity', 'Timesheet']);
@@ -759,7 +763,7 @@ class TimesheetController extends BaseApiController
 
         $timesheet->setExported(!$timesheet->isExported());
 
-        $this->repository->save($timesheet);
+        $this->service->updateTimesheet($timesheet);
 
         $view = new View($timesheet, 200);
         $view->getContext()->setGroups(['Default', 'Entity', 'Timesheet']);
@@ -812,7 +816,7 @@ class TimesheetController extends BaseApiController
 
         $meta->setValue($value);
 
-        $this->repository->save($timesheet);
+        $this->service->updateTimesheet($timesheet);
 
         $view = new View($timesheet, 200);
         $view->getContext()->setGroups(['Default', 'Entity', 'Timesheet']);
