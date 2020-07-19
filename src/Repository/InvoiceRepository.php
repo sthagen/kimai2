@@ -92,7 +92,7 @@ class InvoiceRepository extends EntityRepository
         }
 
         // make sure that admins see all projects
-        if (null !== $user && ($user->isSuperAdmin() || $user->isAdmin())) {
+        if (null !== $user && $user->canSeeAllData()) {
             return;
         }
 
@@ -141,8 +141,10 @@ class InvoiceRepository extends EntityRepository
 
         // this will make sure, that we do not accidentally create results with multiple rows
         //   => which would result in a wrong LIMIT / pagination results
+        // $qb->addGroupBy('i.id');
+
         // the second group by is needed due to SQL standard (even though logically not really required for this query)
-        $qb->addGroupBy('i.id')->addGroupBy($orderBy);
+        // $qb->addGroupBy($orderBy);
 
         return $qb;
     }

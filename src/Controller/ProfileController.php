@@ -261,10 +261,20 @@ class ProfileController extends AbstractController
             ]);
         }
 
+        $sections = [];
+
+        /** @var UserPreference $pref */
+        foreach ($profile->getPreferences() as $pref) {
+            if ($pref->isEnabled()) {
+                $sections[$pref->getSection()] = $pref->getSection();
+            }
+        }
+
         return $this->render('user/form.html.twig', [
             'tab' => 'preferences',
             'user' => $profile,
             'form' => $form->createView(),
+            'sections' => $sections
         ]);
     }
 
@@ -363,7 +373,6 @@ class ProfileController extends AbstractController
             UserPasswordType::class,
             $user,
             [
-                'validation_groups' => ['PasswordUpdate'],
                 'action' => $this->generateUrl('user_profile_password', ['username' => $user->getUsername()]),
                 'method' => 'POST'
             ]
@@ -376,7 +385,6 @@ class ProfileController extends AbstractController
             UserApiTokenType::class,
             $user,
             [
-                'validation_groups' => ['apiTokenUpdate'],
                 'action' => $this->generateUrl('user_profile_api_token', ['username' => $user->getUsername()]),
                 'method' => 'POST'
             ]
