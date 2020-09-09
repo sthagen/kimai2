@@ -10,6 +10,10 @@
 namespace App\Twig;
 
 use App\Constants;
+use App\Entity\Activity;
+use App\Entity\Customer;
+use App\Entity\EntityWithMetaFields;
+use App\Entity\Project;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
@@ -27,6 +31,7 @@ class Extensions extends AbstractExtension
         return [
             new TwigFilter('docu_link', [$this, 'documentationLink']),
             new TwigFilter('multiline_indent', [$this, 'multilineIndent']),
+            new TwigFilter('color', [$this, 'color']),
         ];
     }
 
@@ -37,14 +42,57 @@ class Extensions extends AbstractExtension
     {
         return [
             new TwigFunction('class_name', [$this, 'getClassName']),
+            new TwigFunction('iso_day_by_name', [$this, 'getIsoDayByName']),
         ];
+    }
+
+    public function getIsoDayByName(string $weekDay): int
+    {
+        $key = array_search(
+            strtolower($weekDay),
+            ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+        );
+
+        if (false === $key) {
+            return 1;
+        }
+
+        return ++$key;
+    }
+
+    public function color(EntityWithMetaFields $entity): ?string
+    {
+        if ($entity instanceof Activity) {
+            if (!empty($entity->getColor())) {
+                return $entity->getColor();
+            }
+
+            if (null !== $entity->getProject()) {
+                $entity = $entity->getProject();
+            }
+        }
+
+        if ($entity instanceof Project) {
+            if (!empty($entity->getColor())) {
+                return $entity->getColor();
+            }
+            $entity = $entity->getCustomer();
+        }
+
+        if ($entity instanceof Customer) {
+            if (!empty($entity->getColor())) {
+                return $entity->getColor();
+            }
+        }
+
+        return null;
     }
 
     /**
      * @param object $object
      * @return null|string
      */
-    public function getClassName($object)
+    public function getClassName($object): ?string
     {
         if (!\is_object($object)) {
             return null;
@@ -74,11 +122,7 @@ class Extensions extends AbstractExtension
         return implode(PHP_EOL, $parts);
     }
 
-    /**
-     * @param string $url
-     * @return string
-     */
-    public function documentationLink($url = '')
+    public function documentationLink(?string $url = ''): string
     {
         return Constants::HOMEPAGE . '/documentation/' . $url;
     }

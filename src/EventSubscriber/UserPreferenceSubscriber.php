@@ -15,6 +15,7 @@ use App\Entity\UserPreference;
 use App\Event\PrepareUserEvent;
 use App\Event\UserPreferenceEvent;
 use App\Form\Type\CalendarViewType;
+use App\Form\Type\FirstWeekDayType;
 use App\Form\Type\InitialViewType;
 use App\Form\Type\LanguageType;
 use App\Form\Type\SkinType;
@@ -24,7 +25,6 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\MoneyType;
 use Symfony\Component\Form\Extension\Core\Type\TimezoneType;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Validator\Constraints\Range;
 
@@ -39,18 +39,13 @@ class UserPreferenceSubscriber implements EventSubscriberInterface
      */
     protected $voter;
     /**
-     * @var TokenStorageInterface
-     */
-    protected $storage;
-    /**
      * @var FormConfiguration
      */
     protected $formConfig;
 
-    public function __construct(EventDispatcherInterface $dispatcher, TokenStorageInterface $storage, AuthorizationCheckerInterface $voter, FormConfiguration $formConfig)
+    public function __construct(EventDispatcherInterface $dispatcher, AuthorizationCheckerInterface $voter, FormConfiguration $formConfig)
     {
         $this->eventDispatcher = $dispatcher;
-        $this->storage = $storage;
         $this->voter = $voter;
         $this->formConfig = $formConfig;
     }
@@ -132,9 +127,16 @@ class UserPreferenceSubscriber implements EventSubscriberInterface
             (new UserPreference())
                 ->setName(UserPreference::LOCALE)
                 ->setValue($this->getDefaultLanguage())
-                ->setOrder(300)
+                ->setOrder(250)
                 ->setSection('locale')
                 ->setType(LanguageType::class),
+
+            (new UserPreference())
+                ->setName(UserPreference::FIRST_WEEKDAY)
+                ->setValue(User::DEFAULT_FIRST_WEEKDAY)
+                ->setOrder(300)
+                ->setSection('locale')
+                ->setType(FirstWeekDayType::class),
 
             (new UserPreference())
                 ->setName(UserPreference::SKIN)

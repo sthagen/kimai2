@@ -9,6 +9,9 @@
 
 namespace App\Tests\Twig;
 
+use App\Entity\Activity;
+use App\Entity\Customer;
+use App\Entity\Project;
 use App\Entity\User;
 use App\Twig\Extensions;
 use PHPUnit\Framework\TestCase;
@@ -27,7 +30,7 @@ class ExtensionsTest extends TestCase
 
     public function testGetFilters()
     {
-        $filters = ['docu_link', 'multiline_indent'];
+        $filters = ['docu_link', 'multiline_indent', 'color'];
         $sut = $this->getSut();
         $twigFilters = $sut->getFilters();
         $this->assertCount(\count($filters), $twigFilters);
@@ -41,7 +44,7 @@ class ExtensionsTest extends TestCase
 
     public function testGetFunctions()
     {
-        $functions = ['class_name'];
+        $functions = ['class_name', 'iso_day_by_name'];
         $sut = $this->getSut();
         $twigFunctions = $sut->getFunctions();
         $this->assertCount(\count($functions), $twigFunctions);
@@ -74,7 +77,9 @@ class ExtensionsTest extends TestCase
         $sut = $this->getSut();
         $this->assertEquals('DateTime', $sut->getClassName(new \DateTime()));
         $this->assertEquals('stdClass', $sut->getClassName(new \stdClass()));
+        /* @phpstan-ignore-next-line */
         $this->assertNull($sut->getClassName(''));
+        /* @phpstan-ignore-next-line */
         $this->assertNull($sut->getClassName(null));
         $this->assertEquals('App\Entity\User', $sut->getClassName(new User()));
     }
@@ -115,5 +120,56 @@ sdfsdf' . PHP_EOL . "\n" .
     {
         $sut = $this->getSut();
         self::assertEquals(implode("\n", $expected), $sut->multilineIndent($string, $indent));
+    }
+
+    public function testColor()
+    {
+        $sut = $this->getSut();
+
+        $globalActivity = new Activity();
+        self::assertNull($sut->color($globalActivity));
+
+        $globalActivity->setColor('#000001');
+        self::assertEquals('#000001', $sut->color($globalActivity));
+
+        $customer = new Customer();
+        self::assertNull($sut->color($customer));
+
+        $customer->setColor('#000004');
+        self::assertEquals('#000004', $sut->color($customer));
+
+        $project = new Project();
+        self::assertNull($sut->color($project));
+
+        $project->setCustomer($customer);
+        self::assertEquals('#000004', $sut->color($project));
+
+        $project->setColor('#000003');
+        self::assertEquals('#000003', $sut->color($project));
+
+        $activity = new Activity();
+        self::assertNull($sut->color($activity));
+
+        $activity->setProject($project);
+        self::assertEquals('#000003', $sut->color($activity));
+
+        $activity->setColor('#000002');
+        self::assertEquals('#000002', $sut->color($activity));
+    }
+
+    public function testIsoDayByName()
+    {
+        $sut = $this->getSut();
+
+        self::assertEquals(1, $sut->getIsoDayByName('MoNdAy'));
+        self::assertEquals(2, $sut->getIsoDayByName('tuesDAY'));
+        self::assertEquals(3, $sut->getIsoDayByName('wednesday'));
+        self::assertEquals(4, $sut->getIsoDayByName('thursday'));
+        self::assertEquals(5, $sut->getIsoDayByName('FRIday'));
+        self::assertEquals(6, $sut->getIsoDayByName('saturday'));
+        self::assertEquals(7, $sut->getIsoDayByName('SUNDAY'));
+        // invalid days will return 'monday'
+        self::assertEquals(1, $sut->getIsoDayByName(''));
+        self::assertEquals(1, $sut->getIsoDayByName('sdfgsdf'));
     }
 }
