@@ -152,7 +152,7 @@ abstract class TimesheetAbstractController extends AbstractController
 
                 return $this->redirectToRoute($this->getTimesheetRoute(), ['page' => $request->get('page', 1)]);
             } catch (\Exception $ex) {
-                $this->flashError('action.update.error', ['%reason%' => $ex->getMessage()]);
+                $this->flashUpdateException($ex);
             }
         }
 
@@ -213,7 +213,7 @@ abstract class TimesheetAbstractController extends AbstractController
 
                 return $this->redirectToRoute($this->getTimesheetRoute());
             } catch (\Exception $ex) {
-                $this->flashError('action.update.error', ['%reason%' => $ex->getMessage()]);
+                $this->flashUpdateException($ex);
             }
         }
 
@@ -268,6 +268,15 @@ abstract class TimesheetAbstractController extends AbstractController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $dto->setEntities($form->getData()->getEntities());
+        }
+
+        // using a new timesheet to make sure we ONLY use meta-fields which are registered via events
+        $fake = new Timesheet();
+        $event = new TimesheetMetaDefinitionEvent($fake);
+        $this->dispatcher->dispatch($event);
+
+        foreach ($fake->getMetaFields() as $field) {
+            $dto->setMetaField(clone $field);
         }
 
         $form = $this->getMultiUpdateForm($dto);
@@ -342,6 +351,17 @@ abstract class TimesheetAbstractController extends AbstractController
                     $timesheet->setHourlyRate($dto->getHourlyRate());
                     $execute = true;
                 }
+
+                foreach ($dto->getUpdateMeta() as $metaName) {
+                    if (null !== ($metaField = $dto->getMetaField($metaName))) {
+                        if (null !== ($timesheetMeta = $timesheet->getMetaField($metaName))) {
+                            $timesheetMeta->setValue($metaField->getValue());
+                        } else {
+                            $timesheet->setMetaField(clone $metaField);
+                        }
+                        $execute = true;
+                    }
+                }
             }
 
             if ($execute) {
@@ -351,7 +371,7 @@ abstract class TimesheetAbstractController extends AbstractController
 
                     return $this->redirectToRoute($this->getTimesheetRoute());
                 } catch (\Exception $ex) {
-                    $this->flashError('action.update.error', ['%reason%' => $ex->getMessage()]);
+                    $this->flashUpdateException($ex);
                 }
             }
         }
@@ -383,7 +403,7 @@ abstract class TimesheetAbstractController extends AbstractController
                 $this->service->deleteMultipleTimesheets($dto->getEntities());
                 $this->flashSuccess('action.delete.success');
             } catch (\Exception $ex) {
-                $this->flashError('action.delete.error', ['%reason%' => $ex->getMessage()]);
+                $this->flashDeleteException($ex);
             }
         }
 
