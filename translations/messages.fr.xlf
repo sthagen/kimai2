@@ -1053,7 +1053,7 @@
       </trans-unit>
       <trans-unit id="stats.workingTimeYear">
         <source>stats.workingTimeYear</source>
-        <target>Année complète %année%</target>
+        <target>Année complète %year%</target>
       </trans-unit>
       <trans-unit id="stats.workingTimeMonth">
         <source>stats.workingTimeMonth</source>
@@ -1061,7 +1061,7 @@
       </trans-unit>
       <trans-unit id="stats.workingTimeWeek">
         <source>stats.workingTimeWeek</source>
-        <target>Semaine civile %semaine%</target>
+        <target>Semaine civile %week%</target>
       </trans-unit>
       <trans-unit id="stats.workingTimeToday">
         <source>stats.workingTimeToday</source>
@@ -1114,6 +1114,10 @@
       <trans-unit id="label.batch_meta_fields">
         <source>label.batch_meta_fields</source>
         <target>Champs additionnels</target>
+      </trans-unit>
+      <trans-unit id="sum.total">
+        <source>sum.total</source>
+        <target>Total</target>
       </trans-unit>
     </body>
   </file>
