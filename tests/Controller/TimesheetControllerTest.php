@@ -9,10 +9,14 @@
 
 namespace App\Tests\Controller;
 
+use App\Entity\Activity;
+use App\Entity\Configuration;
 use App\Entity\Timesheet;
 use App\Entity\TimesheetMeta;
 use App\Entity\User;
 use App\Form\Type\DateRangeType;
+use App\Repository\ConfigurationRepository;
+use App\Tests\DataFixtures\ActivityFixtures;
 use App\Tests\DataFixtures\TimesheetFixtures;
 use App\Tests\Mocks\TimesheetTestMetaFieldSubscriberMock;
 
@@ -181,7 +185,7 @@ class TimesheetControllerTest extends ControllerBaseTest
 
         $em = $this->getEntityManager();
         /** @var Timesheet $timesheet */
-        $timesheet = $em->getRepository(Timesheet::class)->find(1);
+        $timesheet = $em->getRepository(Timesheet::class)->findAll()[0];
         $this->assertInstanceOf(\DateTime::class, $timesheet->getBegin());
         $this->assertNull($timesheet->getEnd());
         $this->assertEquals('Testing is fun!', $timesheet->getDescription());
@@ -218,7 +222,7 @@ class TimesheetControllerTest extends ControllerBaseTest
 
         $em = $this->getEntityManager();
         /** @var Timesheet $timesheet */
-        $timesheet = $em->getRepository(Timesheet::class)->find(1);
+        $timesheet = $em->getRepository(Timesheet::class)->findAll()[0];
         $this->assertInstanceOf(\DateTime::class, $timesheet->getBegin());
         $this->assertInstanceOf(\DateTime::class, $timesheet->getEnd());
         $this->assertEquals($expectedDuration, $timesheet->getDuration());
@@ -293,7 +297,7 @@ class TimesheetControllerTest extends ControllerBaseTest
 
         $em = $this->getEntityManager();
         /** @var Timesheet $timesheet */
-        $timesheet = $em->getRepository(Timesheet::class)->find(1);
+        $timesheet = $em->getRepository(Timesheet::class)->findAll()[0];
         $this->assertInstanceOf(\DateTime::class, $timesheet->getBegin());
         $this->assertInstanceOf(\DateTime::class, $timesheet->getEnd());
         $this->assertEquals(50, $timesheet->getRate());
@@ -327,7 +331,7 @@ class TimesheetControllerTest extends ControllerBaseTest
 
         $em = $this->getEntityManager();
         /** @var Timesheet $timesheet */
-        $timesheet = $em->getRepository(Timesheet::class)->find(1);
+        $timesheet = $em->getRepository(Timesheet::class)->findAll()[0];
         $this->assertInstanceOf(\DateTime::class, $timesheet->getBegin());
         $this->assertInstanceOf(\DateTime::class, $timesheet->getEnd());
         $this->assertEquals(50, $timesheet->getRate());
@@ -369,6 +373,7 @@ class TimesheetControllerTest extends ControllerBaseTest
                     ['name' => 'timesheet.active_entries.default_begin', 'value' => '08:00'],
                     ['name' => 'timesheet.rules.allow_future_times', 'value' => true],
                     ['name' => 'timesheet.rules.allow_overlapping_records', 'value' => false],
+                    ['name' => 'timesheet.rules.allow_overbooking_budget', 'value' => true],
                     ['name' => 'timesheet.rules.lockdown_period_start', 'value' => null],
                     ['name' => 'timesheet.rules.lockdown_period_end', 'value' => null],
                     ['name' => 'timesheet.rules.lockdown_grace_period', 'value' => null],
@@ -406,6 +411,59 @@ class TimesheetControllerTest extends ControllerBaseTest
         );
     }
 
+    public function testCreateActionWithOverbookedActivity()
+    {
+        $client = $this->getClientForAuthenticatedUser(User::ROLE_SUPER_ADMIN);
+
+        $fixture = new ActivityFixtures();
+        $fixture->setAmount(1);
+        $fixture->setIsGlobal(true);
+        $fixture->setIsVisible(true);
+        $fixture->setCallback(function (Activity $activity) {
+            $activity->setBudget(1000);
+            $activity->setTimeBudget(3600);
+        });
+        $activities = $this->importFixture($fixture);
+        /** @var Activity $activity */
+        $activity = $activities[0];
+
+        $fixture = new TimesheetFixtures();
+        $fixture->setAmount(1);
+        $fixture->setActivities([$activity]);
+        $fixture->setUser($this->getUserByRole(User::ROLE_USER));
+        $timesheets = $this->importFixture($fixture);
+        $id = $timesheets[0]->getId();
+
+        $this->request($client, '/timesheet/' . $id . '/edit');
+
+        $response = $client->getResponse();
+        $this->assertTrue($response->isSuccessful());
+
+        /** @var ConfigurationRepository $repository */
+        $repository = $this->getEntityManager()->getRepository(Configuration::class);
+        $config = new Configuration();
+        $config->setName('timesheet.rules.allow_overbooking_budget');
+        $config->setValue(false);
+        $repository->saveConfiguration($config);
+
+        $this->assertHasValidationError(
+            $client,
+            '/timesheet/' . $id . '/edit',
+            'form[name=timesheet_edit_form]',
+            [
+                'timesheet_edit_form' => [
+                    'hourlyRate' => 100,
+                    'begin' => '2020-02-18 01:00',
+                    'end' => '2020-02-18 02:10',
+                    'duration' => '01:10',
+                    'project' => 1,
+                    'activity' => $activity->getId(),
+                ]
+            ],
+            ['#timesheet_edit_form_activity']
+        );
+    }
+
     public function testCreateActionWithBeginAndEndAndTagValues()
     {
         $client = $this->getClientForAuthenticatedUser(User::ROLE_ADMIN);
@@ -428,7 +486,7 @@ class TimesheetControllerTest extends ControllerBaseTest
 
         $em = $this->getEntityManager();
         /** @var Timesheet $timesheet */
-        $timesheet = $em->getRepository(Timesheet::class)->find(1);
+        $timesheet = $em->getRepository(Timesheet::class)->findAll()[0];
         $this->assertInstanceOf(\DateTime::class, $timesheet->getBegin());
         $this->assertInstanceOf(\DateTime::class, $timesheet->getEnd());
         $this->assertEquals(800, $timesheet->getRate());
@@ -450,9 +508,10 @@ class TimesheetControllerTest extends ControllerBaseTest
         $fixture->setAmount(10);
         $fixture->setUser($this->getUserByRole(User::ROLE_USER));
         $fixture->setStartDate('2017-05-01');
-        $this->importFixture($fixture);
+        $timesheets = $this->importFixture($fixture);
+        $id = $timesheets[0]->getId();
 
-        $this->request($client, '/timesheet/1/edit');
+        $this->request($client, '/timesheet/' . $id . '/edit');
 
         $response = $client->getResponse();
         $this->assertTrue($response->isSuccessful());
@@ -478,7 +537,7 @@ class TimesheetControllerTest extends ControllerBaseTest
 
         $em = $this->getEntityManager();
         /** @var Timesheet $timesheet */
-        $timesheet = $em->getRepository(Timesheet::class)->find(1);
+        $timesheet = $em->getRepository(Timesheet::class)->find($id);
         $this->assertEquals('foo-bar', $timesheet->getDescription());
     }
 

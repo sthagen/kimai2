@@ -72,6 +72,10 @@
                 <source>attachments</source>
                 <target>Files</target>
             </trans-unit>
+            <trans-unit id="file">
+                <source>file</source>
+                <target>File</target>
+            </trans-unit>
             <trans-unit id="rates.empty">
                 <source>rates.empty</source>
                 <target>No fees have been configured yet.</target>
@@ -641,6 +645,10 @@
                 <source>label.vat_id</source>
                 <target>VAT-ID</target>
             </trans-unit>
+            <trans-unit id="label.tax_rate">
+                <source>label.tax_rate</source>
+                <target>Tax rate</target>
+            </trans-unit>
             <trans-unit id="label.contact">
                 <source>label.contact</source>
                 <target>Contact</target>
@@ -1149,6 +1157,22 @@
             <trans-unit id="help.batch_meta_fields">
                 <source>help.batch_meta_fields</source>
                 <target>Fields that are to be updated must first be activated by clicking on the associated checkbox.</target>
+            </trans-unit>
+            <trans-unit id="label.includeNoWork">
+                <source>label.includeNoWork</source>
+                <target>Show entries without bookings</target>
+            </trans-unit>
+            <trans-unit id="label.includeNoBudget">
+                <source>label.includeNoBudget</source>
+                <target>Show entries without budget</target>
+            </trans-unit>
+            <trans-unit id="label.not_exported">
+                <source>label.not_exported</source>
+                <target>Not exported</target>
+            </trans-unit>
+            <trans-unit id="label.not_invoiced">
+                <source>label.not_invoiced</source>
+                <target>Not billed</target>
             </trans-unit>
         </body>
     </file>

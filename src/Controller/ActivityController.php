@@ -92,6 +92,7 @@ final class ActivityController extends AbstractController
             'query' => $query,
             'toolbarForm' => $form->createView(),
             'metaColumns' => $this->findMetaColumns($query),
+            'defaultCurrency' => $this->configuration->getCustomerDefaultCurrency()
         ]);
     }
 
@@ -230,6 +231,10 @@ final class ActivityController extends AbstractController
             try {
                 $this->repository->saveActivity($activity);
                 $this->flashSuccess('action.update.success');
+
+                if ($this->isGranted('view', $activity)) {
+                    return $this->redirectToRoute('activity_details', ['id' => $activity->getId()]);
+                }
 
                 return $this->redirectToRoute('admin_activity');
             } catch (Exception $ex) {

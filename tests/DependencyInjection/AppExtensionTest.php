@@ -153,7 +153,7 @@ class AppExtensionTest extends TestCase
             ],
             'kimai.theme' => [
                 'active_warning' => 3,
-                'box_color' => 'green',
+                'box_color' => 'blue',
                 'select_type' => 'selectpicker',
                 'show_about' => true,
                 'chart' => [
@@ -205,6 +205,7 @@ class AppExtensionTest extends TestCase
                     'lockdown_period_start' => null,
                     'lockdown_period_end' => null,
                     'lockdown_grace_period' => null,
+                    'allow_overbooking_budget' => true,
                 ],
                 'default_begin' => 'now',
                 'duration_increment' => null,

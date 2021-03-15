@@ -285,6 +285,7 @@ class ConfigurationTest extends TestCase
                     'lockdown_period_start' => null,
                     'lockdown_period_end' => null,
                     'lockdown_grace_period' => null,
+                    'allow_overbooking_budget' => true,
                 ],
                 'duration_increment' => null,
                 'time_increment' => null,
@@ -340,7 +341,7 @@ class ConfigurationTest extends TestCase
             ],
             'theme' => [
                 'active_warning' => 3,
-                'box_color' => 'green',
+                'box_color' => 'blue',
                 'select_type' => 'selectpicker',
                 'auto_reload_datatable' => false,
                 'show_about' => true,
