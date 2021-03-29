@@ -366,7 +366,7 @@
       </trans-unit>
       <trans-unit id="placeholder.type_message">
         <source>placeholder.type_message</source>
-        <target>Schreibe Deine Nachricht...</target>
+        <target>Schreibe deine Nachricht …</target>
       </trans-unit>
       <trans-unit id="label.billable">
         <source>label.billable</source>
@@ -683,9 +683,9 @@
       </trans-unit>
       <trans-unit id="label.mobile">
         <source>label.mobile</source>
-        <target>Handy</target>
+        <target>Mobiltelefon</target>
       </trans-unit>
-      <trans-unit id="label.homepage">
+      <trans-unit id="label.homepage" approved="yes">
         <source>label.homepage</source>
         <target>Homepage</target>
       </trans-unit>
@@ -952,6 +952,10 @@
       <trans-unit id="invoice.due_days">
         <source>invoice.due_days</source>
         <target>Zahlungsziel</target>
+      </trans-unit>
+      <trans-unit id="invoice.payment_date">
+        <source>invoice.payment_date</source>
+        <target>Zahlungsdatum</target>
       </trans-unit>
       <trans-unit id="invoice.from">
         <source>invoice.from</source>
