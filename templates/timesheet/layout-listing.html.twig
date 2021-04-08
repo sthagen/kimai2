@@ -45,6 +45,7 @@
     }) %}
 {% endfor %}
 {% set columns = columns|merge({
+    'exported': {'class': 'text-center hidden w-min', 'orderBy': false},
     'actions': {'class': 'actions alwaysVisible'},
 }) %}
 
@@ -59,7 +60,7 @@
     {% if entries.count == 0 %}
         {{ widgets.nothing_found('kimai.timesheetUpdate') }}
     {% else %}
-        {{ tables.datatable_header(tableName, columns, query, {'striped': not showSummary, 'reload': 'kimai.timesheetUpdate'}) }}
+        {{ tables.datatable_header(tableName, columns, query, {'reload': 'kimai.timesheetUpdate'}) }}
 
         {% set checkOverlappingDesc = false %}
         {% set checkOverlappingAsc = false %}
@@ -162,6 +163,9 @@
                         {{ tables.datatable_meta_column(entry, field) }}
                     </td>
                 {% endfor %}
+                <td class="{{ tables.data_table_column_class(tableName, columns, 'exported') }}">
+                    {{ widgets.label_boolean(entry.exported) }}
+                </td>
                 <td class="actions">
                     {{ block('row_action') }}
                 </td>
