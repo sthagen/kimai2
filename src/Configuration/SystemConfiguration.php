@@ -208,6 +208,11 @@ class SystemConfiguration implements SystemBundleConfiguration
         return (string) $this->find('timesheet.rules.lockdown_grace_period');
     }
 
+    public function getTimesheetLockdownTimeZone(): ?string
+    {
+        return $this->find('timesheet.rules.lockdown_period_timezone');
+    }
+
     public function isTimesheetLockdownActive(): bool
     {
         return !empty($this->find('timesheet.rules.lockdown_period_start')) && !empty($this->find('timesheet.rules.lockdown_period_end'));
@@ -239,6 +244,19 @@ class SystemConfiguration implements SystemBundleConfiguration
     public function getTimesheetIncrementEnd(): ?int
     {
         return $this->getIncrement('timesheet.time_increment', $this->getTimesheetDefaultRoundingEnd(), 0);
+    }
+
+    // ========== Company configurations ==========
+
+    public function getFinancialYearStart(): ?string
+    {
+        $start = $this->find('company.financial_year');
+
+        if (empty($start)) {
+            return null;
+        }
+
+        return (string) $start;
     }
 
     // ========== Theme configurations ==========
