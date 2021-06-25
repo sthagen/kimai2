@@ -74,6 +74,7 @@ class SystemConfigurationControllerTest extends ControllerBaseTest
             ['form[name=system_configuration_form_timesheet]', $this->createUrl('/admin/system-config/update/timesheet')],
             ['form[name=system_configuration_form_lockdown_period]', $this->createUrl('/admin/system-config/update/lockdown_period')],
             ['form[name=system_configuration_form_invoice]', $this->createUrl('/admin/system-config/update/invoice')],
+            ['form[name=system_configuration_form_authentication]', $this->createUrl('/admin/system-config/update/authentication')],
             ['form[name=system_configuration_form_rounding]', $this->createUrl('/admin/system-config/update/rounding')],
             ['form[name=system_configuration_form_form_customer]', $this->createUrl('/admin/system-config/update/form_customer')],
             ['form[name=system_configuration_form_form_user]', $this->createUrl('/admin/system-config/update/form_user')],
@@ -92,7 +93,6 @@ class SystemConfigurationControllerTest extends ControllerBaseTest
         $this->assertEquals('default', $configService->find('timesheet.mode'));
         $this->assertTrue($configService->find('timesheet.rules.allow_future_times'));
         $this->assertEquals(1, $configService->find('timesheet.active_entries.hard_limit'));
-        $this->assertEquals(1, $configService->find('timesheet.active_entries.soft_limit'));
 
         $form = $client->getCrawler()->filter('form[name=system_configuration_form_timesheet]')->form();
         $client->submit($form, [
@@ -104,7 +104,6 @@ class SystemConfigurationControllerTest extends ControllerBaseTest
                     ['name' => 'timesheet.rules.allow_overlapping_records', 'value' => false],
                     ['name' => 'timesheet.rules.allow_overbooking_budget', 'value' => false],
                     ['name' => 'timesheet.active_entries.hard_limit', 'value' => 99],
-                    ['name' => 'timesheet.active_entries.soft_limit', 'value' => 77],
                 ]
             ]
         ]);
@@ -119,7 +118,6 @@ class SystemConfigurationControllerTest extends ControllerBaseTest
         $this->assertFalse($configService->find('timesheet.rules.allow_future_times'));
         $this->assertFalse($configService->find('timesheet.rules.allow_overlapping_records'));
         $this->assertEquals(99, $configService->find('timesheet.active_entries.hard_limit'));
-        $this->assertEquals(77, $configService->find('timesheet.active_entries.soft_limit'));
     }
 
     public function testUpdateLockdownPeriodConfig()
@@ -172,14 +170,12 @@ class SystemConfigurationControllerTest extends ControllerBaseTest
                         ['name' => 'timesheet.rules.allow_overlapping_records', 'value' => 1],
                         ['name' => 'timesheet.rules.allow_overbooking_budget', 'value' => 1],
                         ['name' => 'timesheet.active_entries.hard_limit', 'value' => -1],
-                        ['name' => 'timesheet.active_entries.soft_limit', 'value' => -1],
                     ]
                 ]
             ],
             [
                 '#system_configuration_form_timesheet_configuration_0_value', // mode
                 '#system_configuration_form_timesheet_configuration_5_value', // hard_limit
-                '#system_configuration_form_timesheet_configuration_6_value', // soft_limit
             ],
             true
         );
