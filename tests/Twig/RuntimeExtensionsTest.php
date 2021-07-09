@@ -22,7 +22,7 @@ class RuntimeExtensionsTest extends TestCase
 {
     public function testGetFilters()
     {
-        $expected = ['md2html', 'desc2html', 'comment2html', 'comment1line'];
+        $expected = ['md2html', 'desc2html', 'comment2html', 'comment1line', 'colorize'];
         $i = 0;
 
         $sut = new RuntimeExtensions();
@@ -40,8 +40,10 @@ class RuntimeExtensionsTest extends TestCase
         $expected = [
             'trigger',
             'actions',
+            'get_title',
             'progressbar_color',
             'javascript_translations',
+            'theme_config',
             'active_timesheets',
             'encore_entry_css_source',
             'render_widget',
